@@ -1457,8 +1457,8 @@ class Sventes_Teaser_Plugin {
                     <th scope="row"><label for="itn-teaser-source-order"><?php esc_html_e( 'Sortierreihenfolge', 'itn-teaser' ); ?></label></th>
                     <td>
                         <select id="itn-teaser-source-order" name="sventes_teaser_settings[teaser_source_order]">
-                            <option value="DESC" <?php selected( $source_order, 'DESC' ); ?>>DESC</option>
-                            <option value="ASC" <?php selected( $source_order, 'ASC' ); ?>>ASC</option>
+                            <option value="DESC" <?php selected( $source_order, 'DESC' ); ?>><?php esc_html_e( 'Absteigend (DESC)', 'itn-teaser' ); ?></option>
+                            <option value="ASC" <?php selected( $source_order, 'ASC' ); ?>><?php esc_html_e( 'Aufsteigend (ASC)', 'itn-teaser' ); ?></option>
                         </select>
                     </td>
                 </tr>
