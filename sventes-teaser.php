@@ -83,6 +83,8 @@ class Sventes_Teaser_Plugin {
             'teaser_source_mode'   => 'manual', // 'manual', 'acf_posts'
             'teaser_source_post_type' => '',
             'teaser_source_category' => '',
+            'teaser_source_orderby' => 'date',
+            'teaser_source_order' => 'DESC',
             'teaser_auto_button_label' => __( 'Zum Beitrag', 'itn-teaser' ),
             'extra_classes'        => '',
             'border_enabled'       => false,
@@ -691,6 +693,7 @@ class Sventes_Teaser_Plugin {
             $source_post_type = '';
         }
         $source_category = isset( $settings_in['teaser_source_category'] ) ? sanitize_text_field( (string) $settings_in['teaser_source_category'] ) : '';
+        $source_sort_settings = $this->get_sanitized_teaser_source_sort_settings( $settings_in );
         $auto_button_label = $this->get_auto_button_label_setting( $settings_in );
 
         $border_style = isset( $settings_in['border_style'] ) ? sanitize_key( $settings_in['border_style'] ) : $defaults['border_style'];
@@ -804,6 +807,8 @@ class Sventes_Teaser_Plugin {
             'teaser_source_mode'   => $source_mode,
             'teaser_source_post_type' => $source_post_type,
             'teaser_source_category' => $source_category,
+            'teaser_source_orderby' => $source_sort_settings['orderby'],
+            'teaser_source_order' => $source_sort_settings['order'],
             'teaser_auto_button_label' => $auto_button_label,
             'extra_classes'        => $this->sanitize_css_classes( isset( $settings_in['extra_classes'] ) ? $settings_in['extra_classes'] : $defaults['extra_classes'] ),
             'border_enabled'       => ! empty( $settings_in['border_enabled'] ),
@@ -864,6 +869,40 @@ class Sventes_Teaser_Plugin {
             'bullets_arrow_offset_y' => $bullets_arrow_offset_y,
             'custom_css'           => $this->sanitize_custom_css( isset( $settings_in['custom_css'] ) ? (string) $settings_in['custom_css'] : '' ),
             'stylesheet_url'       => isset( $settings_in['stylesheet_url'] ) ? esc_url_raw( (string) $settings_in['stylesheet_url'] ) : '',
+        );
+    }
+
+    private function sanitize_teaser_source_orderby( $value, $default = 'date' ) {
+        $sanitized = sanitize_key( (string) $value );
+        if ( ! in_array( $sanitized, array( 'date', 'title', 'menu_order' ), true ) ) {
+            $sanitized = $default;
+        }
+
+        return $sanitized;
+    }
+
+    private function sanitize_teaser_source_order( $value, $default = 'DESC' ) {
+        $sanitized = strtoupper( sanitize_key( (string) $value ) );
+        if ( ! in_array( $sanitized, array( 'ASC', 'DESC' ), true ) ) {
+            $sanitized = $default;
+        }
+
+        return $sanitized;
+    }
+
+    private function get_sanitized_teaser_source_sort_settings( $settings ) {
+        $settings = is_array( $settings ) ? $settings : array();
+        $defaults = $this->get_default_settings();
+
+        return array(
+            'orderby' => $this->sanitize_teaser_source_orderby(
+                isset( $settings['teaser_source_orderby'] ) ? $settings['teaser_source_orderby'] : $defaults['teaser_source_orderby'],
+                $defaults['teaser_source_orderby']
+            ),
+            'order' => $this->sanitize_teaser_source_order(
+                isset( $settings['teaser_source_order'] ) ? $settings['teaser_source_order'] : $defaults['teaser_source_order'],
+                $defaults['teaser_source_order']
+            ),
         );
     }
 
@@ -1198,12 +1237,15 @@ class Sventes_Teaser_Plugin {
         }
 
         $category_filter = isset( $settings['teaser_source_category'] ) ? sanitize_text_field( (string) $settings['teaser_source_category'] ) : '';
+        $source_sort_settings = $this->get_sanitized_teaser_source_sort_settings( $settings );
+        $source_orderby = $source_sort_settings['orderby'];
+        $source_order = $source_sort_settings['order'];
         $query_args = array(
             'post_type'           => $post_type,
             'post_status'         => 'publish',
             'posts_per_page'      => $this->max_auto_posts,
-            'orderby'             => 'date',
-            'order'               => 'DESC',
+            'orderby'             => $source_orderby,
+            'order'               => $source_order,
             'ignore_sticky_posts' => true,
             'no_found_rows'       => true,
         );
@@ -1349,6 +1391,9 @@ class Sventes_Teaser_Plugin {
         $source_mode = isset( $settings['teaser_source_mode'] ) ? $settings['teaser_source_mode'] : 'manual';
         $source_post_type = isset( $settings['teaser_source_post_type'] ) ? $settings['teaser_source_post_type'] : '';
         $source_category = isset( $settings['teaser_source_category'] ) ? $settings['teaser_source_category'] : '';
+        $source_sort_settings = $this->get_sanitized_teaser_source_sort_settings( $settings );
+        $source_orderby = $source_sort_settings['orderby'];
+        $source_order = $source_sort_settings['order'];
         $auto_button_label = $this->get_auto_button_label_setting( $settings );
         $source_post_type_options = $this->get_teaser_source_post_type_options();
         $source_category_options = $this->get_teaser_category_choices( $source_post_type );
@@ -1419,6 +1464,25 @@ class Sventes_Teaser_Plugin {
                             <?php endforeach; ?>
                         </select>
                         <p class="description"><?php esc_html_e( 'Optional nach dem ACF-Feld teaserkategorie (Auswahlkästchen) filtern.', 'itn-teaser' ); ?></p>
+                    </td>
+                </tr>
+                <tr class="js-itn-teaser-auto-fields" <?php if ( 'acf_posts' !== $source_mode ) : ?>style="display:none;"<?php endif; ?>>
+                    <th scope="row"><label for="itn-teaser-source-orderby"><?php esc_html_e( 'Sortieren nach', 'itn-teaser' ); ?></label></th>
+                    <td>
+                        <select id="itn-teaser-source-orderby" name="sventes_teaser_settings[teaser_source_orderby]">
+                            <option value="date" <?php selected( $source_orderby, 'date' ); ?>><?php esc_html_e( 'Veröffentlichungsdatum', 'itn-teaser' ); ?></option>
+                            <option value="title" <?php selected( $source_orderby, 'title' ); ?>><?php esc_html_e( 'Titel', 'itn-teaser' ); ?></option>
+                            <option value="menu_order" <?php selected( $source_orderby, 'menu_order' ); ?>><?php esc_html_e( 'Manuelle Reihenfolge (WordPress)', 'itn-teaser' ); ?></option>
+                        </select>
+                    </td>
+                </tr>
+                <tr class="js-itn-teaser-auto-fields" <?php if ( 'acf_posts' !== $source_mode ) : ?>style="display:none;"<?php endif; ?>>
+                    <th scope="row"><label for="itn-teaser-source-order"><?php esc_html_e( 'Sortierreihenfolge', 'itn-teaser' ); ?></label></th>
+                    <td>
+                        <select id="itn-teaser-source-order" name="sventes_teaser_settings[teaser_source_order]">
+                            <option value="DESC" <?php selected( $source_order, 'DESC' ); ?>><?php esc_html_e( 'Absteigend (DESC)', 'itn-teaser' ); ?></option>
+                            <option value="ASC" <?php selected( $source_order, 'ASC' ); ?>><?php esc_html_e( 'Aufsteigend (ASC)', 'itn-teaser' ); ?></option>
+                        </select>
                     </td>
                 </tr>
                 <tr class="js-itn-teaser-auto-fields" <?php if ( 'acf_posts' !== $source_mode ) : ?>style="display:none;"<?php endif; ?>>
