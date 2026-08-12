@@ -83,6 +83,8 @@ class Sventes_Teaser_Plugin {
             'teaser_source_mode'   => 'manual', // 'manual', 'acf_posts'
             'teaser_source_post_type' => '',
             'teaser_source_category' => '',
+            'teaser_source_orderby' => 'date',
+            'teaser_source_order' => 'DESC',
             'teaser_auto_button_label' => __( 'Zum Beitrag', 'itn-teaser' ),
             'extra_classes'        => '',
             'border_enabled'       => false,
@@ -691,6 +693,14 @@ class Sventes_Teaser_Plugin {
             $source_post_type = '';
         }
         $source_category = isset( $settings_in['teaser_source_category'] ) ? sanitize_text_field( (string) $settings_in['teaser_source_category'] ) : '';
+        $source_orderby = isset( $settings_in['teaser_source_orderby'] ) ? sanitize_key( $settings_in['teaser_source_orderby'] ) : $defaults['teaser_source_orderby'];
+        if ( ! in_array( $source_orderby, array( 'date', 'title', 'menu_order' ), true ) ) {
+            $source_orderby = $defaults['teaser_source_orderby'];
+        }
+        $source_order = isset( $settings_in['teaser_source_order'] ) ? strtoupper( sanitize_key( $settings_in['teaser_source_order'] ) ) : $defaults['teaser_source_order'];
+        if ( ! in_array( $source_order, array( 'ASC', 'DESC' ), true ) ) {
+            $source_order = $defaults['teaser_source_order'];
+        }
         $auto_button_label = $this->get_auto_button_label_setting( $settings_in );
 
         $border_style = isset( $settings_in['border_style'] ) ? sanitize_key( $settings_in['border_style'] ) : $defaults['border_style'];
@@ -804,6 +814,8 @@ class Sventes_Teaser_Plugin {
             'teaser_source_mode'   => $source_mode,
             'teaser_source_post_type' => $source_post_type,
             'teaser_source_category' => $source_category,
+            'teaser_source_orderby' => $source_orderby,
+            'teaser_source_order' => $source_order,
             'teaser_auto_button_label' => $auto_button_label,
             'extra_classes'        => $this->sanitize_css_classes( isset( $settings_in['extra_classes'] ) ? $settings_in['extra_classes'] : $defaults['extra_classes'] ),
             'border_enabled'       => ! empty( $settings_in['border_enabled'] ),
@@ -1198,12 +1210,20 @@ class Sventes_Teaser_Plugin {
         }
 
         $category_filter = isset( $settings['teaser_source_category'] ) ? sanitize_text_field( (string) $settings['teaser_source_category'] ) : '';
+        $source_orderby = isset( $settings['teaser_source_orderby'] ) ? sanitize_key( $settings['teaser_source_orderby'] ) : 'date';
+        if ( ! in_array( $source_orderby, array( 'date', 'title', 'menu_order' ), true ) ) {
+            $source_orderby = 'date';
+        }
+        $source_order = isset( $settings['teaser_source_order'] ) ? strtoupper( sanitize_key( $settings['teaser_source_order'] ) ) : 'DESC';
+        if ( ! in_array( $source_order, array( 'ASC', 'DESC' ), true ) ) {
+            $source_order = 'DESC';
+        }
         $query_args = array(
             'post_type'           => $post_type,
             'post_status'         => 'publish',
             'posts_per_page'      => $this->max_auto_posts,
-            'orderby'             => 'date',
-            'order'               => 'DESC',
+            'orderby'             => $source_orderby,
+            'order'               => $source_order,
             'ignore_sticky_posts' => true,
             'no_found_rows'       => true,
         );
@@ -1349,6 +1369,8 @@ class Sventes_Teaser_Plugin {
         $source_mode = isset( $settings['teaser_source_mode'] ) ? $settings['teaser_source_mode'] : 'manual';
         $source_post_type = isset( $settings['teaser_source_post_type'] ) ? $settings['teaser_source_post_type'] : '';
         $source_category = isset( $settings['teaser_source_category'] ) ? $settings['teaser_source_category'] : '';
+        $source_orderby = isset( $settings['teaser_source_orderby'] ) ? $settings['teaser_source_orderby'] : 'date';
+        $source_order = isset( $settings['teaser_source_order'] ) ? $settings['teaser_source_order'] : 'DESC';
         $auto_button_label = $this->get_auto_button_label_setting( $settings );
         $source_post_type_options = $this->get_teaser_source_post_type_options();
         $source_category_options = $this->get_teaser_category_choices( $source_post_type );
@@ -1419,6 +1441,25 @@ class Sventes_Teaser_Plugin {
                             <?php endforeach; ?>
                         </select>
                         <p class="description"><?php esc_html_e( 'Optional nach dem ACF-Feld teaserkategorie (Auswahlkästchen) filtern.', 'itn-teaser' ); ?></p>
+                    </td>
+                </tr>
+                <tr class="js-itn-teaser-auto-fields" <?php if ( 'acf_posts' !== $source_mode ) : ?>style="display:none;"<?php endif; ?>>
+                    <th scope="row"><label for="itn-teaser-source-orderby"><?php esc_html_e( 'Sortieren nach', 'itn-teaser' ); ?></label></th>
+                    <td>
+                        <select id="itn-teaser-source-orderby" name="sventes_teaser_settings[teaser_source_orderby]">
+                            <option value="date" <?php selected( $source_orderby, 'date' ); ?>><?php esc_html_e( 'Veröffentlichungsdatum', 'itn-teaser' ); ?></option>
+                            <option value="title" <?php selected( $source_orderby, 'title' ); ?>><?php esc_html_e( 'Titel', 'itn-teaser' ); ?></option>
+                            <option value="menu_order" <?php selected( $source_orderby, 'menu_order' ); ?>><?php esc_html_e( 'Manuelle Reihenfolge (WordPress)', 'itn-teaser' ); ?></option>
+                        </select>
+                    </td>
+                </tr>
+                <tr class="js-itn-teaser-auto-fields" <?php if ( 'acf_posts' !== $source_mode ) : ?>style="display:none;"<?php endif; ?>>
+                    <th scope="row"><label for="itn-teaser-source-order"><?php esc_html_e( 'Sortierreihenfolge', 'itn-teaser' ); ?></label></th>
+                    <td>
+                        <select id="itn-teaser-source-order" name="sventes_teaser_settings[teaser_source_order]">
+                            <option value="DESC" <?php selected( $source_order, 'DESC' ); ?>>DESC</option>
+                            <option value="ASC" <?php selected( $source_order, 'ASC' ); ?>>ASC</option>
+                        </select>
                     </td>
                 </tr>
                 <tr class="js-itn-teaser-auto-fields" <?php if ( 'acf_posts' !== $source_mode ) : ?>style="display:none;"<?php endif; ?>>
