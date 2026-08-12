@@ -693,8 +693,7 @@ class Sventes_Teaser_Plugin {
             $source_post_type = '';
         }
         $source_category = isset( $settings_in['teaser_source_category'] ) ? sanitize_text_field( (string) $settings_in['teaser_source_category'] ) : '';
-        $source_orderby = $this->sanitize_teaser_source_orderby( isset( $settings_in['teaser_source_orderby'] ) ? $settings_in['teaser_source_orderby'] : $defaults['teaser_source_orderby'] );
-        $source_order = $this->sanitize_teaser_source_order( isset( $settings_in['teaser_source_order'] ) ? $settings_in['teaser_source_order'] : $defaults['teaser_source_order'] );
+        $source_sort_settings = $this->get_sanitized_teaser_source_sort_settings( $settings_in );
         $auto_button_label = $this->get_auto_button_label_setting( $settings_in );
 
         $border_style = isset( $settings_in['border_style'] ) ? sanitize_key( $settings_in['border_style'] ) : $defaults['border_style'];
@@ -808,8 +807,8 @@ class Sventes_Teaser_Plugin {
             'teaser_source_mode'   => $source_mode,
             'teaser_source_post_type' => $source_post_type,
             'teaser_source_category' => $source_category,
-            'teaser_source_orderby' => $source_orderby,
-            'teaser_source_order' => $source_order,
+            'teaser_source_orderby' => $source_sort_settings['orderby'],
+            'teaser_source_order' => $source_sort_settings['order'],
             'teaser_auto_button_label' => $auto_button_label,
             'extra_classes'        => $this->sanitize_css_classes( isset( $settings_in['extra_classes'] ) ? $settings_in['extra_classes'] : $defaults['extra_classes'] ),
             'border_enabled'       => ! empty( $settings_in['border_enabled'] ),
@@ -873,24 +872,38 @@ class Sventes_Teaser_Plugin {
         );
     }
 
-    private function sanitize_teaser_source_orderby( $value ) {
-        $defaults = $this->get_default_settings();
+    private function sanitize_teaser_source_orderby( $value, $default = 'date' ) {
         $sanitized = sanitize_key( (string) $value );
         if ( ! in_array( $sanitized, array( 'date', 'title', 'menu_order' ), true ) ) {
-            $sanitized = $defaults['teaser_source_orderby'];
+            $sanitized = $default;
         }
 
         return $sanitized;
     }
 
-    private function sanitize_teaser_source_order( $value ) {
-        $defaults = $this->get_default_settings();
+    private function sanitize_teaser_source_order( $value, $default = 'DESC' ) {
         $sanitized = strtoupper( sanitize_key( (string) $value ) );
         if ( ! in_array( $sanitized, array( 'ASC', 'DESC' ), true ) ) {
-            $sanitized = $defaults['teaser_source_order'];
+            $sanitized = $default;
         }
 
         return $sanitized;
+    }
+
+    private function get_sanitized_teaser_source_sort_settings( $settings ) {
+        $settings = is_array( $settings ) ? $settings : array();
+        $defaults = $this->get_default_settings();
+
+        return array(
+            'orderby' => $this->sanitize_teaser_source_orderby(
+                isset( $settings['teaser_source_orderby'] ) ? $settings['teaser_source_orderby'] : $defaults['teaser_source_orderby'],
+                $defaults['teaser_source_orderby']
+            ),
+            'order' => $this->sanitize_teaser_source_order(
+                isset( $settings['teaser_source_order'] ) ? $settings['teaser_source_order'] : $defaults['teaser_source_order'],
+                $defaults['teaser_source_order']
+            ),
+        );
     }
 
     public function handle_post() {
@@ -1224,9 +1237,9 @@ class Sventes_Teaser_Plugin {
         }
 
         $category_filter = isset( $settings['teaser_source_category'] ) ? sanitize_text_field( (string) $settings['teaser_source_category'] ) : '';
-        $defaults = $this->get_default_settings();
-        $source_orderby = $this->sanitize_teaser_source_orderby( isset( $settings['teaser_source_orderby'] ) ? $settings['teaser_source_orderby'] : $defaults['teaser_source_orderby'] );
-        $source_order = $this->sanitize_teaser_source_order( isset( $settings['teaser_source_order'] ) ? $settings['teaser_source_order'] : $defaults['teaser_source_order'] );
+        $source_sort_settings = $this->get_sanitized_teaser_source_sort_settings( $settings );
+        $source_orderby = $source_sort_settings['orderby'];
+        $source_order = $source_sort_settings['order'];
         $query_args = array(
             'post_type'           => $post_type,
             'post_status'         => 'publish',
@@ -1378,9 +1391,9 @@ class Sventes_Teaser_Plugin {
         $source_mode = isset( $settings['teaser_source_mode'] ) ? $settings['teaser_source_mode'] : 'manual';
         $source_post_type = isset( $settings['teaser_source_post_type'] ) ? $settings['teaser_source_post_type'] : '';
         $source_category = isset( $settings['teaser_source_category'] ) ? $settings['teaser_source_category'] : '';
-        $defaults = $this->get_default_settings();
-        $source_orderby = $this->sanitize_teaser_source_orderby( isset( $settings['teaser_source_orderby'] ) ? $settings['teaser_source_orderby'] : $defaults['teaser_source_orderby'] );
-        $source_order = $this->sanitize_teaser_source_order( isset( $settings['teaser_source_order'] ) ? $settings['teaser_source_order'] : $defaults['teaser_source_order'] );
+        $source_sort_settings = $this->get_sanitized_teaser_source_sort_settings( $settings );
+        $source_orderby = $source_sort_settings['orderby'];
+        $source_order = $source_sort_settings['order'];
         $auto_button_label = $this->get_auto_button_label_setting( $settings );
         $source_post_type_options = $this->get_teaser_source_post_type_options();
         $source_category_options = $this->get_teaser_category_choices( $source_post_type );
