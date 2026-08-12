@@ -1224,8 +1224,9 @@ class Sventes_Teaser_Plugin {
         }
 
         $category_filter = isset( $settings['teaser_source_category'] ) ? sanitize_text_field( (string) $settings['teaser_source_category'] ) : '';
-        $source_orderby = $this->sanitize_teaser_source_orderby( isset( $settings['teaser_source_orderby'] ) ? $settings['teaser_source_orderby'] : '' );
-        $source_order = $this->sanitize_teaser_source_order( isset( $settings['teaser_source_order'] ) ? $settings['teaser_source_order'] : '' );
+        $defaults = $this->get_default_settings();
+        $source_orderby = $this->sanitize_teaser_source_orderby( isset( $settings['teaser_source_orderby'] ) ? $settings['teaser_source_orderby'] : $defaults['teaser_source_orderby'] );
+        $source_order = $this->sanitize_teaser_source_order( isset( $settings['teaser_source_order'] ) ? $settings['teaser_source_order'] : $defaults['teaser_source_order'] );
         $query_args = array(
             'post_type'           => $post_type,
             'post_status'         => 'publish',
@@ -1377,8 +1378,9 @@ class Sventes_Teaser_Plugin {
         $source_mode = isset( $settings['teaser_source_mode'] ) ? $settings['teaser_source_mode'] : 'manual';
         $source_post_type = isset( $settings['teaser_source_post_type'] ) ? $settings['teaser_source_post_type'] : '';
         $source_category = isset( $settings['teaser_source_category'] ) ? $settings['teaser_source_category'] : '';
-        $source_orderby = $this->sanitize_teaser_source_orderby( isset( $settings['teaser_source_orderby'] ) ? $settings['teaser_source_orderby'] : '' );
-        $source_order = $this->sanitize_teaser_source_order( isset( $settings['teaser_source_order'] ) ? $settings['teaser_source_order'] : '' );
+        $defaults = $this->get_default_settings();
+        $source_orderby = $this->sanitize_teaser_source_orderby( isset( $settings['teaser_source_orderby'] ) ? $settings['teaser_source_orderby'] : $defaults['teaser_source_orderby'] );
+        $source_order = $this->sanitize_teaser_source_order( isset( $settings['teaser_source_order'] ) ? $settings['teaser_source_order'] : $defaults['teaser_source_order'] );
         $auto_button_label = $this->get_auto_button_label_setting( $settings );
         $source_post_type_options = $this->get_teaser_source_post_type_options();
         $source_category_options = $this->get_teaser_category_choices( $source_post_type );
