@@ -1,0 +1,76 @@
+/* Simple admin styles for ITN Teaser */
+.sventes-teaser-admin .nav-tab-wrapper {
+  margin-bottom: 20px;
+}
+
+.sventes-teaser-admin .itn-teaser-tab-panel {
+  background: #fff;
+  border: 1px solid #dcdcde;
+  padding: 20px;
+  margin-top: 0;
+}
+
+.sventes-teaser-admin .itn-teaser-set-switcher,
+.sventes-teaser-admin .itn-teaser-actions-grid {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.sventes-teaser-admin .itn-teaser-shortcode-box {
+  margin-bottom: 16px;
+}
+
+.sventes-teaser-admin .itn-teaser-shortcode-box .code {
+  max-width: 100%;
+}
+
+.sventes-teaser-admin .itn-teaser-inline-form {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.sventes-teaser-admin .sventes-teaser-item {
+  border: 1px solid #e5e5e5;
+  background: #fafafa;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.sventes-teaser-admin .sventes-teaser-item > h3 {
+  cursor: move;
+}
+
+.sventes-teaser-admin .sventes-teaser-placeholder {
+  border: 1px dashed #2271b1;
+  background: #f0f6fc;
+  min-height: 80px;
+  margin-bottom: 16px;
+}
+
+.sventes-teaser-admin .sventes-image-preview {
+  margin-bottom: 8px;
+}
+
+.sventes-teaser-admin .sventes-field {
+  margin-bottom: 12px;
+}
+
+.sventes-teaser-admin .sventes-content-field .wp-editor-wrap {
+  max-width: 100%;
+}
+
+.sventes-teaser-admin .itn-teaser-role-option {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.sventes-teaser-admin .itn-teaser-usage-hint {
+  margin-top: 16px;
+}
